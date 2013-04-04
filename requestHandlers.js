@@ -1,6 +1,6 @@
 // Data Directory: Node.js won't expand a tilda, so going with relative path.
 // The directory will be in the home folder if node is invoked by the runServer shell script
-var dataRootDir = "/IMCCrowdServer-Data";
+var dataRootDir = "IMCCrowdServer-Data";
 
 var querystring = require("querystring"),
     fs          = require("fs"),
