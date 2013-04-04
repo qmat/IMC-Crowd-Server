@@ -87,9 +87,13 @@ function clientv1UploadData(response, request) {
 		try 
 		{
 			fs.mkdirSync(dataRootDir + "/" + "uploadedFiles", 0750);
+		}
+		catch(e) {console.log("Directory already present - uploadedFiles");}
+		try 
+		{
 			fs.mkdirSync(dataRootDir + "/" + "uploadedFiles" + "/" + sessionID, 0750);
 		}
-		catch(e) {console.log("Directory already present");}		
+		catch(e) {console.log("Directory already present - uploadedFiles" + "/" + sessionID);}
 		var newPath = dataRootDir + "/" + "uploadedFiles" + "/" + sessionID + "/" + files.file.name;
 		
 		try 
@@ -98,7 +102,7 @@ function clientv1UploadData(response, request) {
 			console.log("Uploaded file moved to " + newPath);
 			success = true;
 		}
-		catch(e) {console.log("Failed to move uploaded file from " + files.file.path);}
+		catch(e) {console.log("Failed to move uploaded file from " + files.file.path + " to " + newPath);}
 	}
 	
 	// Return success (or not)
