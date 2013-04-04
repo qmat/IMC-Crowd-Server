@@ -1,4 +1,4 @@
-var dataRootDir = "./data"; // currently relative to current path, ie. shell node.js launched from
+var dataRootDir = "~/IMCCrowdServer-Data";
 
 var querystring = require("querystring"),
     fs          = require("fs"),
