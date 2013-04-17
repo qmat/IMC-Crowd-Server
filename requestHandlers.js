@@ -12,24 +12,36 @@ catch(e){}
 	
 var sessionLogStream = fs.createWriteStream(dataRootDir + "/" + "sessionLogStream.txt", {flags: 'a', encoding: 'utf8', mode: 0666});
 
+function generateUUID() {
+	// Generate a lexographically ascending uniqueID
+	var date = Date.now()
+	date = date.toString();
+	while (date.length < 13) date = "0" + date;
+
+	var random = Math.round(Math.random() * 1E18);
+	random = random.toString();
+	while (random.length < 18) random = "0" + random;
+
+	return (date + 'x' + random);
+}
+
+function validateUUID(UUID) {
+	var success = true;
+	success = success && (UUID.length == 32);
+	success = success && (UUID.charAt(13) == "x");
+	
+	return success;
+}
+
 /* Client makes POST request to registerID on session start
  * Fields
  *   ID: <blank or previously supplied ID>
  *   Time: device time
  * Returns
- * 	 ID: a unique ID, echoes the supplied ID if supplied
+ *   ID: a unique ID
  *
+ * Crucially, maintains a log on server linking supplied IDs to new IDs.
  */
-
-function generateUUID() {
-	// Generate a lexographically ascending uniqueID
-	return (Date.now()) + 'x' + Math.round(Math.random() * 1E18);
-}
-
-function validateUUID(UUID) {
-	// TODO: This should be more thorough. Check for 'x' ?
-	return (UUID.length > 0);
-}
 
 function clientv1RegisterID(response, request) {
 	console.log("Request handler 'clientv1RegisterID' was called")
