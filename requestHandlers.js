@@ -11,6 +11,7 @@ try {fs.mkdirSync(dataRootDir)}
 catch(e){}
 	
 var sessionLogStream = fs.createWriteStream(dataRootDir + "/" + "sessionLogStream.txt", {flags: 'a', encoding: 'utf8', mode: 0666});
+var errorLogStream = fs.createWriteStream(dataRootDir + "/" + "errorLogStream.txt", {flags: 'a', encoding: 'utf8', mode: 0666});
 
 function generateUUID() {
 	// Generate a lexographically ascending uniqueID
@@ -51,7 +52,11 @@ function clientv1RegisterID(response, request) {
 		
 		// Parse out sessionID supplied in registration request
 		var sentUUID = fields['sessionID'];
-		console.log("sentUUID: " + sentUUID); 
+		console.log("sentUUID: " + sentUUID);
+
+		// Parse out client timestamp in registration request
+		var timeClient = fields['time'];
+		var timeServer = (new Date).getTime();
 
 		// Generate a new sessionID for this session being registered
 		var newUUID = generateUUID();
@@ -59,9 +64,9 @@ function clientv1RegisterID(response, request) {
 		
 		// Log link betweensentUUID and newUUID
 		if (validateUUID(sentUUID))
-			sessionLogStream.write(sentUUID + " -> " + newUUID + "\n");
+			sessionLogStream.write(sentUUID + " -> " + newUUID + " with client time: " + timeClient + " at server time: " + timeServer + "\n");
 		else
-			sessionLogStream.write("New Client: " + newUUID + "\n");
+			sessionLogStream.write("New Client: " + newUUID + " with client time: " + timeClient + " at server time: " + timeServer + "\n");
 			
 		// Respond back with new UUID
 		response.writeHead(200, {'content-type': 'text/plain'});
@@ -128,6 +133,9 @@ function clientv1UploadData(response, request) {
 	
     response.write(JSON.stringify(returnInfo));
     response.end();
+
+	if (success) 	sessionLogStream.write("Received file " + files.file.name + " from sessionID " + sessionID + "\n");
+	else 		errorLogStream.write("Failed to receive file " + files.file.name + " from sessionID " + sessionID + "\n");
 
 	console.log("Sent response body " + JSON.stringify(returnInfo));
   });
