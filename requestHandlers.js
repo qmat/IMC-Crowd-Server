@@ -56,7 +56,6 @@ function clientv1RegisterID(response, request) {
 
 		// Parse out client timestamp in registration request
 		var timeClient = fields['time'];
-		var timeServer = (new Date).getTime();
 
 		// Generate a new sessionID for this session being registered
 		var newUUID = generateUUID();
@@ -64,9 +63,9 @@ function clientv1RegisterID(response, request) {
 		
 		// Log link betweensentUUID and newUUID
 		if (validateUUID(sentUUID))
-			sessionLogStream.write(sentUUID + " -> " + newUUID + " with client time: " + timeClient + " at server time: " + timeServer + "\n");
+			sessionLogStream.write(sentUUID + " -> " + newUUID + " with client time: " + timeClient + "\n");
 		else
-			sessionLogStream.write("New Client: " + newUUID + " with client time: " + timeClient + " at server time: " + timeServer + "\n");
+			sessionLogStream.write("New Client: " + newUUID + " with client time: " + timeClient + "\n");
 			
 		// Respond back with new UUID
 		response.writeHead(200, {'content-type': 'text/plain'});
