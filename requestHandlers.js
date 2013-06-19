@@ -11,7 +11,7 @@ try {fs.mkdirSync(dataRootDir)}
 catch(e){}
 	
 var sessionLogStream = fs.createWriteStream(dataRootDir + "/" + "sessionLogStream.txt", {flags: 'a', encoding: 'utf8', mode: 0666});
-var errorLogStream = fs.createWriteStream(dataRootDir + "/" + "errorLogStream.txt", {flags: 'a', encoding: 'utf8', mode: 0666});
+var logStream = fs.createWriteStream(dataRootDir + "/" + "logStream.txt", {flags: 'a', encoding: 'utf8', mode: 0666});
 
 function generateUUID() {
 	// Generate a lexographically ascending uniqueID
@@ -74,7 +74,7 @@ function clientv1RegisterID(response, request) {
 	});
 }
 
-/* Client makes POST request to periodically upload its data files
+/* Client makes POST request to upload a data file
  * Fields
  * Returns
  *
@@ -98,8 +98,17 @@ function clientv1UploadData(response, request) {
 	
 	var success = false;
 	
-	var sessionID = fields['folder']
-	if (validateUUID(sessionID)) {
+	var uploadSessionID = fields['uploadSessionID'];
+	var sessionID = fields['folder'];
+	var folder = sessionID;
+	
+	// If the folder isn't what we expect (ie. 'No Session'), then change it something we expect
+	if (!validateUUID(folder)) {
+		logStream.write("Upload of file from folder " + folder + " to be filed into it's uploadSessionID: " + uploadSessionID + "\n");
+		folder = uploadSessionID;
+	}
+	
+	if (validateUUID(uploadSessionID)) {
 		// TODO: ASYNC THIS!
 		
 		try 
@@ -109,10 +118,10 @@ function clientv1UploadData(response, request) {
 		catch(e) {console.log("Directory already present - uploadedFiles");}
 		try 
 		{
-			fs.mkdirSync(dataRootDir + "/" + "uploadedFiles" + "/" + sessionID, 0750);
+			fs.mkdirSync(dataRootDir + "/" + "uploadedFiles" + "/" + folder, 0750);
 		}
-		catch(e) {console.log("Directory already present - uploadedFiles" + "/" + sessionID);}
-		var newPath = dataRootDir + "/" + "uploadedFiles" + "/" + sessionID + "/" + files.file.name;
+		catch(e) {console.log("Directory already present - uploadedFiles" + "/" + folder);}
+		var newPath = dataRootDir + "/" + "uploadedFiles" + "/" + folder + "/" + files.file.name;
 		
 		try 
 		{
@@ -133,8 +142,8 @@ function clientv1UploadData(response, request) {
     response.write(JSON.stringify(returnInfo));
     response.end();
 
-	if (success) 	sessionLogStream.write("Received file " + files.file.name + " from sessionID " + sessionID + "\n");
-	else 		errorLogStream.write("Failed to receive file " + files.file.name + " from sessionID " + sessionID + "\n");
+	if (success) 	logStream.write("Received file " + files.file.name + " from sessionID " + sessionID + "\n");
+	else 		logStream.write("Failed to receive file " + files.file.name + " from sessionID " + sessionID + "\n");
 
 	console.log("Sent response body " + JSON.stringify(returnInfo));
   });
